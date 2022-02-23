@@ -55,7 +55,21 @@ st.sidebar.markdown('## Set Plot Parameters')
 time_min_value = data.index[0].to_pydatetime()
 time_max_value = data.index[-1].to_pydatetime()
 timerange = st.sidebar.slider('Time range', min_value=time_min_value,
-                              max_value=time_max_value, value=(time_min_value,time_max_value))
+                              max_value=time_max_value, value=(time_min_value,time_max_value),
+                              step=datetime.timedelta(days = 1 ))
 
 mask = (data.index >= timerange[0]) & (data.index <= timerange[-1])
+
+st.markdown("""
+## XCO2 Raw Data
+""")
 st.line_chart(data.loc[mask])
+
+data_re = data.copy()
+data_re.loc[data_re['xco2'] <= 0] = np.NaN
+series = data_re['xco2'].resample('2min').mean().to_frame()
+
+st.markdown("""
+## XCO2 Resampled Data
+""")
+st.line_chart(series[timerange[0]:timerange[-1]])
